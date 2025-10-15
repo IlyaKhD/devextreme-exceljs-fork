@@ -20,6 +20,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npmjs
     steps:
       - name: Checkout devextreme-exceljs-fork repository
         uses: actions/checkout@v4
