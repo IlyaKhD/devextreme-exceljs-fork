@@ -7,6 +7,12 @@ on:
         type: string
         required: true
         description: Publishing version (tag name)
+      dry-run:
+        type: boolean
+        required: false
+        default: false
+        description: Dry run
+
 
 jobs:
   publish:
@@ -53,4 +59,10 @@ jobs:
       - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
+          DRY_RUN: "${{ inputs.dry-run }}"
+        run: |
+          if [ "$DRY_RUN" = true ]; then
+            echo "npm publish --dry-run"
+          else
+            echo "npm publish"
+          fi
