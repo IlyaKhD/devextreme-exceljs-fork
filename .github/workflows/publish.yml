@@ -7,10 +7,20 @@ on:
         type: string
         required: true
         description: Publishing version (tag name)
+      dry-run:
+        type: boolean
+        required: false
+        default: false
+        description: Dry run
+
+permissions:
+  id-token: write  # Required for OIDC (Trusted Publishing)
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npmjs
     steps:
       - name: Checkout devextreme-exceljs-fork repository
         uses: actions/checkout@v4
@@ -20,9 +30,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '24'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+
+      # npm version 11.5.1 or later is required to use Trusted Publishing
+      - name: NPM Version
+        run: npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -52,5 +66,10 @@ jobs:
 
       - name: Publish to NPM
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
+          DRY_RUN: "${{ inputs.dry-run }}"
+        run: |
+          if [ "$DRY_RUN" = true ]; then
+            npm publish --dry-run
+          else
+            npm publish
+          fi
